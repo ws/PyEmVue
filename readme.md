@@ -1,6 +1,11 @@
 # PyEmVue
 
-A Python Library for reading data from the Emporia Vue energy monitoring system.
+A (fork of a) Python Library for reading data from the Emporia Vue energy monitoring system and EVSEs.
+
+Fork differences/additions:
+- Assumes you are using [uv](https://docs.astral.sh/uv/)
+- [Adds unit tests](https://github.com/ws/PyEmVue/tree/tests)
+- [Adds support for the "EV Charging Report" endpoint](https://github.com/ws/PyEmVue/tree/ev-charging-report) which shows how much you spent to charge in a given EVSE session
 
 The library can be invoked directly to pull back some basic info but requires your email and password to be added to a keys.json file, which is then replaced with the access tokens.
 
