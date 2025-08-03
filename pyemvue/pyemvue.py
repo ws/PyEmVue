@@ -19,9 +19,11 @@ from pyemvue.device import (
     ChannelType,
     Vehicle,
     VehicleStatus,
+    EvChargingReport,
 )
 
 API_ROOT = "https://api.emporiaenergy.com"
+API_C_ROOT = "https://c-api.emporiaenergy.com"
 API_CHANNELS = "devices/{deviceGid}/channels"
 API_CHANNEL_TYPES = "devices/channels/channeltypes"
 API_CHARGER = "devices/evcharger"
@@ -34,6 +36,7 @@ API_GET_STATUS = "customers/devices/status"
 API_OUTLET = "devices/outlet"
 API_VEHICLES = "customers/vehicles"
 API_VEHICLE_STATUS = "vehicles/v2/settings?vehicleGid={vehicleGid}"
+API_EV_CHARGING_REPORT = "v1/customers/ev-charging-report?device_id={device_id}&start={start}&end={end}"
 
 API_MAINTENANCE = (
     "https://s3.amazonaws.com/com.emporiaenergy.manual.ota/maintenance/maintenance.json"
@@ -319,6 +322,34 @@ class PyEmVue(object):
         if response.text:
             j = response.json()
             return VehicleStatus().from_json_dictionary(j)
+        return None
+
+    def get_ev_charging_report(
+        self,
+        device_id: str,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> Optional[EvChargingReport]:
+        """Get EV charging report for a device over a given time period."""
+        url = API_EV_CHARGING_REPORT.format(
+            device_id=device_id,
+            start=_format_time(start),
+            end=_format_time(end)
+        )
+        # EV charging report uses the c-api host instead of the regular API host
+        full_url = f"{API_C_ROOT}/{url}"
+        
+        # Make request with auth headers to the c-api host
+        headers = {"authorization": self.auth.tokens['id_token']}
+        response = requests.get(
+            full_url, 
+            headers=headers,
+            timeout=(self.connect_timeout, self.read_timeout)
+        )
+        response.raise_for_status()
+        if response.text:
+            j = response.json()
+            return EvChargingReport().from_json_dictionary(j)
         return None
 
     def login(

@@ -468,3 +468,113 @@ class VehicleStatus(object):
             "chargeCurrentRequest": self.charge_current_request,
             "chargeCurrentRequestMax": self.charge_current_request_max,
         }
+
+
+class EvChargingInterval(object):
+    def __init__(self):
+        self.start: datetime.datetime
+        self.end: datetime.datetime
+
+    def from_json_dictionary(self, js: "dict[str, Any]") -> "EvChargingInterval":
+        if "start" in js:
+            self.start = parse(js["start"])
+        if "end" in js:
+            self.end = parse(js["end"])
+        return self
+
+
+class EvChargingSession(object):
+    def __init__(self):
+        self.interval = EvChargingInterval()
+        self.energy_kwhs: float = 0.0
+        self.charging_cost: float = 0.0
+        self.savings: float = 0.0
+        self.potential_savings: Optional[float] = None
+
+    def from_json_dictionary(self, js: "dict[str, Any]") -> "EvChargingSession":
+        if "interval" in js:
+            self.interval = EvChargingInterval().from_json_dictionary(js["interval"])
+        if "energy_kwhs" in js:
+            self.energy_kwhs = js["energy_kwhs"]
+        if "charging_cost" in js:
+            self.charging_cost = js["charging_cost"]
+        if "savings" in js:
+            self.savings = js["savings"]
+        if "potential_savings" in js:
+            self.potential_savings = js["potential_savings"]
+        return self
+
+
+class EvPlugInSession(object):
+    def __init__(self):
+        self.interval = EvChargingInterval()
+        self.charging_sessions: list[EvChargingSession] = []
+
+    def from_json_dictionary(self, js: "dict[str, Any]") -> "EvPlugInSession":
+        if "interval" in js:
+            self.interval = EvChargingInterval().from_json_dictionary(js["interval"])
+        if "charging_sessions" in js and js["charging_sessions"]:
+            self.charging_sessions = []
+            for session_data in js["charging_sessions"]:
+                session = EvChargingSession().from_json_dictionary(session_data)
+                self.charging_sessions.append(session)
+        return self
+
+
+class EvDailyChargingTotal(object):
+    def __init__(self):
+        self.date: str = ""
+        self.energy_kwhs: float = 0.0
+        self.charging_cost: float = 0.0
+        self.savings: float = 0.0
+        self.potential_savings: Optional[float] = None
+
+    def from_json_dictionary(self, js: "dict[str, Any]") -> "EvDailyChargingTotal":
+        if "date" in js:
+            self.date = js["date"]
+        if "energy_kwhs" in js:
+            self.energy_kwhs = js["energy_kwhs"]
+        if "charging_cost" in js:
+            self.charging_cost = js["charging_cost"]
+        if "savings" in js:
+            self.savings = js["savings"]
+        if "potential_savings" in js:
+            self.potential_savings = js["potential_savings"]
+        return self
+
+
+class EvChargingReport(object):
+    def __init__(self):
+        self.device_id: str = ""
+        self.interval = EvChargingInterval()
+        self.report_description: str = ""
+        self.call_to_action_type: Optional[str] = None
+        self.energy_kwhs: float = 0.0
+        self.charging_cost: float = 0.0
+        self.daily_charging_totals: list[EvDailyChargingTotal] = []
+        self.plug_in_sessions: list[EvPlugInSession] = []
+
+    def from_json_dictionary(self, js: "dict[str, Any]") -> "EvChargingReport":
+        if "device_id" in js:
+            self.device_id = js["device_id"]
+        if "interval" in js:
+            self.interval = EvChargingInterval().from_json_dictionary(js["interval"])
+        if "report_description" in js:
+            self.report_description = js["report_description"]
+        if "call_to_action_type" in js:
+            self.call_to_action_type = js["call_to_action_type"]
+        if "energy_kwhs" in js:
+            self.energy_kwhs = js["energy_kwhs"]
+        if "charging_cost" in js:
+            self.charging_cost = js["charging_cost"]
+        if "daily_charging_totals" in js and js["daily_charging_totals"]:
+            self.daily_charging_totals = []
+            for daily_data in js["daily_charging_totals"]:
+                daily_total = EvDailyChargingTotal().from_json_dictionary(daily_data)
+                self.daily_charging_totals.append(daily_total)
+        if "plug_in_sessions" in js and js["plug_in_sessions"]:
+            self.plug_in_sessions = []
+            for session_data in js["plug_in_sessions"]:
+                plug_in_session = EvPlugInSession().from_json_dictionary(session_data)
+                self.plug_in_sessions.append(plug_in_session)
+        return self

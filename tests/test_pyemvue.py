@@ -8,7 +8,8 @@ from pyemvue.pyemvue import PyEmVue, _format_time
 from pyemvue.auth import Auth, SimulatedAuth
 from pyemvue.device import (
     VueDevice, VueDeviceChannel, VueUsageDevice, VueDeviceChannelUsage,
-    OutletDevice, ChargerDevice, ChannelType, Vehicle, VehicleStatus
+    OutletDevice, ChargerDevice, ChannelType, Vehicle, VehicleStatus,
+    EvChargingReport
 )
 from pyemvue.customer import Customer
 from pyemvue.enums import Scale, Unit
@@ -356,6 +357,75 @@ class TestFormatTime(unittest.TestCase):
         time = datetime.datetime(2023, 1, 1, 12, 0, 0)
         result = _format_time(time)
         self.assertEqual(result, "2023-01-01T12:00:00Z")
+
+    def test_get_ev_charging_report_success(self):
+        mock_response = Mock()
+        mock_response.text = json.dumps({
+            "device_id": "C93A7B12DCF947F58E3B76",
+            "interval": {
+                "start": "2025-08-01T00:00:00Z",
+                "end": "2025-09-01T00:00:00Z"
+            },
+            "report_description": "Test report description",
+            "call_to_action_type": None,
+            "energy_kwhs": 75.65,
+            "charging_cost": 5.39,
+            "daily_charging_totals": [
+                {
+                    "date": "2025-08-01",
+                    "energy_kwhs": 34.07,
+                    "charging_cost": 2.44,
+                    "savings": 2.99,
+                    "potential_savings": None
+                }
+            ],
+            "plug_in_sessions": [
+                {
+                    "interval": {
+                        "start": "2025-07-31T21:10:19.493Z",
+                        "end": "2025-08-01T13:54:25.457Z"
+                    },
+                    "charging_sessions": [
+                        {
+                            "interval": {
+                                "start": "2025-08-01T01:00:58.575Z",
+                                "end": "2025-08-01T01:28:07.479Z"
+                            },
+                            "energy_kwhs": 4.27,
+                            "charging_cost": 0.31,
+                            "savings": 0.85,
+                            "potential_savings": None
+                        }
+                    ]
+                }
+            ]
+        })
+        mock_response.raise_for_status.return_value = None
+        self.mock_auth.request.return_value = mock_response
+
+        start = datetime.datetime(2025, 8, 1, tzinfo=datetime.timezone.utc)
+        end = datetime.datetime(2025, 9, 1, tzinfo=datetime.timezone.utc)
+        result = self.vue.get_ev_charging_report("C93A7B12DCF947F58E3B76", start, end)
+
+        self.assertIsInstance(result, EvChargingReport)
+        self.assertEqual(result.device_id, "C93A7B12DCF947F58E3B76")
+        self.assertEqual(result.energy_kwhs, 75.65)
+        self.assertEqual(result.charging_cost, 5.39)
+        self.assertEqual(len(result.daily_charging_totals), 1)
+        self.assertEqual(len(result.plug_in_sessions), 1)
+        self.assertEqual(len(result.plug_in_sessions[0].charging_sessions), 1)
+
+    def test_get_ev_charging_report_empty_response(self):
+        mock_response = Mock()
+        mock_response.text = ""
+        mock_response.raise_for_status.return_value = None
+        self.mock_auth.request.return_value = mock_response
+
+        start = datetime.datetime(2025, 8, 1, tzinfo=datetime.timezone.utc)
+        end = datetime.datetime(2025, 9, 1, tzinfo=datetime.timezone.utc)
+        result = self.vue.get_ev_charging_report("C93A7B12DCF947F58E3B76", start, end)
+
+        self.assertIsNone(result)
 
 
 if __name__ == '__main__':
