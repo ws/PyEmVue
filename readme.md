@@ -248,6 +248,22 @@ for vehicle in vehicles:
     print(f'\t{vehicleStatus.vehicle_gid} {vehicleStatus.vehicle_state} - Charging: {vehicleStatus.charging_state} Battery level: {vehicleStatus.battery_level}')
 ```
 
+## Testing
+### Running Tests
+
+To run the test suite:
+
+```bash
+# Using uv (recommended)
+uv run python -m unittest discover -s tests -p "test_*.py" -v
+
+# Or using standard Python
+python -m unittest discover -s tests -p "test_*.py" -v
+
+# Run specific test file
+uv run python -m unittest tests.test_pyemvue -v
+```
+
 ### Disclaimer
 
 This project is not affiliated with or endorsed by Emporia Energy.
