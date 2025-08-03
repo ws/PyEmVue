@@ -353,6 +353,71 @@ PUT `/devices/outlet`
 }
 ```
 
+## Get EV charging report
+
+GET `https://c-api.emporiaenergy.com/v1/customers/ev-charging-report?device_id={device_id}&start={start}&end={end}`
+
+**Note**: This endpoint uses a different base URL (`c-api.emporiaenergy.com`) compared to other API endpoints.
+
+Returns detailed EV charging report data including energy usage, costs, savings, daily totals, and individual charging sessions for a specific device over a given time period.
+
+**Parameters:**
+- `device_id`: The device ID of the EV charger (e.g., "C93A7B12DCF947F58E3B76")
+- `start`: Start time in ISO format (e.g., "2025-08-01T00:00:00.000Z")
+- `end`: End time in ISO format (e.g., "2025-09-01T00:00:00.000Z")
+
+### Response
+
+```json
+{
+    "device_id": "C93A7B12DCF947F58E3B76",
+    "interval": {
+        "start": "2025-08-01T00:00:00Z",
+        "end": "2025-09-01T00:00:00Z"
+    },
+    "report_description": "Congratulations, you saved $3.01 by using Time of Use schedules! Garage EV Charger used 76 kWhs of energy last month across 4 charging sessions.",
+    "call_to_action_type": null,
+    "energy_kwhs": 75.65873156436784,
+    "charging_cost": 5.393483004725677,
+    "daily_charging_totals": [
+        {
+            "date": "2025-08-01",
+            "energy_kwhs": 34.06611431699406,
+            "charging_cost": 2.4353521823291824,
+            "savings": 2.98865136536103,
+            "potential_savings": null
+        },
+        {
+            "date": "2025-08-02",
+            "energy_kwhs": 41.59261724737378,
+            "charging_cost": 2.958130822396495,
+            "savings": 0.01990057251546759,
+            "potential_savings": 0.012587368971632262
+        }
+    ],
+    "plug_in_sessions": [
+        {
+            "interval": {
+                "start": "2025-07-31T21:10:19.493Z",
+                "end": "2025-08-01T13:54:25.457Z"
+            },
+            "charging_sessions": [
+                {
+                    "interval": {
+                        "start": "2025-08-01T01:00:58.575Z",
+                        "end": "2025-08-01T01:28:07.479Z"
+                    },
+                    "energy_kwhs": 4.266762325642687,
+                    "charging_cost": 0.30531264403687824,
+                    "savings": 0.8479932125843399,
+                    "potential_savings": null
+                }
+            ]
+        }
+    ]
+}
+```
+
 
 ## Get partner data
 
