@@ -248,6 +248,21 @@ for vehicle in vehicles:
     print(f'\t{vehicleStatus.vehicle_gid} {vehicleStatus.vehicle_state} - Charging: {vehicleStatus.charging_state} Battery level: {vehicleStatus.battery_level}')
 ```
 
+### Get EV Charging Report
+
+```python
+# Get charging report for the last 30 days
+end_date = datetime.datetime.now(datetime.timezone.utc)
+start_date = end_date - datetime.timedelta(days=30)
+device_id = "C93A7B12DCF947F58E3B76"
+
+report = vue.get_ev_charging_report(device_id, start_date, end_date)
+print(f"Total Energy: {report.energy_kwhs:.2f} kWh")
+print(f"Total Cost: ${report.charging_cost:.2f}")
+```
+
+Gets detailed EV charging report data including energy usage, costs, savings, daily totals, and charging sessions for a specific device over a time period.
+
 ## Testing
 ### Running Tests
 
